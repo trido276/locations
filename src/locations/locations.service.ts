@@ -17,7 +17,11 @@ export default class LocationsService {
   /**
    * Return all locations in database
    */
-  getAllLocations() {
+  getAllLocations(): Promise<Location[]> {
+    /**
+     * find all location that donot have parent > building
+     * then add their's childrend > then loop: if have chilren: get children
+     */
     return this.locationsRepository.find()
   }
   /**
@@ -26,14 +30,13 @@ export default class LocationsService {
    * @param id ID of the Location
    * @returns Location if found
    */
-  async getLocationById(id: string) {
+  async getLocationById(id: string): Promise<Location> {
     try {
       const location = await this.locationsRepository.findOne({
         where: {
           id: id,
         }
-      }
-      )
+      })
       if (location) {
         return location
       }
@@ -48,15 +51,13 @@ export default class LocationsService {
     * Get parent then set locatioName = append child,
     * shortName = append each parent's shortName,
     * new location doesnot have child,
-    * IF SAME LEVEL : CAN NOT HAVE SAME SHORTNAME,
-    * PARENT AND CHILD CAN NOT BE NULL AT THE SAME TIME ,
     * throw Error if any
     * @param createLocationDto Data of created Location
     * @returns Created Location
   */
-  async createLocation(createLocationDto: CreateLocationDto) {
+  async createLocation(createLocationDto: CreateLocationDto): Promise<Location> {
 
-    validate(createLocationDto)
+    await validate(createLocationDto)
     let loc = new Location
     loc.parse_to_location(createLocationDto)
     Logger.log(`Creating Location with values: ${loc.toString()}`)
@@ -82,24 +83,20 @@ export default class LocationsService {
    * @param updateLocation Data of the updated Location
    * @returns Updated Location
    */
-  async updateLocation(id: string, updateLocation: UpdateLocationDto) {
-    validate(updateLocation)
+  async updateLocation(id: string, updateLocation: UpdateLocationDto): Promise<Location> {
+    await validate(updateLocation)
     const location = new Location
     location.parse_to_location(updateLocation)
     Logger.log(`Update Location ${id} with values: ${location.toString()}`)
 
     // TODO: try catch
-    /**
-     *  get by ID / check if change parent
-     * 
-     *  */
-
-    await this.locationsRepository.update(id, location)
 
     const updatedLocation = await this.getLocationById(id)
     if (!updatedLocation) {
       throw new HttpException('Location not found', HttpStatus.NOT_FOUND)
     }
+
+    await this.locationsRepository.update(id, location)
 
     Logger.log(`Update successfully!`)
     return updatedLocation
@@ -113,10 +110,11 @@ export default class LocationsService {
    * throw Error if any
    * @param id ID of the deleted Location
    */
-  async deleteLocation(id: string) {
+  async deleteLocation(id: string): Promise<void> {
     const deleteResponse = await this.locationsRepository.delete(id)
     if (!deleteResponse.affected) {
       throw new HttpException('Location not found', HttpStatus.NOT_FOUND)
     }
   }
+
 }

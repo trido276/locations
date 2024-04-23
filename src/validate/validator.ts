@@ -1,17 +1,47 @@
 import { HttpException, HttpStatus, Logger } from '@nestjs/common';
-// import Location from '../locations/location.entity';
+import { Repository, FindManyOptions } from 'typeorm'
+// import Location from '../locations/location.entity'
 
-function validate(location: Object) : void {
+/**
+ * Validate input Location data, throw Error if any
+ * @param location 
+ */
+export async function validate(location: Object): Promise<void> {
   /** TODO: validate
    * remove redundant keys
    * throw error if empty
-   * PARENT AND CHILD CAN NOT BE NULL AT THE SAME TIME
-   * IF SAME LEVEL : CAN NOT HAVE SAME SHORTNAME
   */
- if (!location || !Object.keys(location).length) {
+  if (!location || !Object.keys(location).length) {
     Logger.error(`Validate false with values: ${JSON.stringify(location)}`)
     throw new HttpException('Validation error', HttpStatus.BAD_REQUEST);
   }
+
+  await validateShortname(location)
+
 }
 
-export { validate }
+/**
+ * ShortName in same level is unique, throw Error if not
+ * @param location 
+ */
+async function validateShortname(location: Object): Promise<void> {
+
+  let locationsRepository: Repository<Location>
+
+  const find = await locationsRepository.find({
+    where: {
+      parent: location["parent"]
+    }
+  } as FindManyOptions<Location>)
+
+  if (!find) {
+    throw new HttpException('Location not found', HttpStatus.NOT_FOUND)
+  }
+
+  for (let each in find) {
+    if (each["id"] == location["id"]) {
+      throw new HttpException('LocationShortName has already taken', HttpStatus.NOT_FOUND)
+    }
+  }
+
+}
