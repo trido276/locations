@@ -20,26 +20,6 @@ export default class LocationsService {
   async getAllLocations(): Promise<any[]> {
     const data = await this.locationsRepository.find()
 
-    // let result = []
-    /**
-     * push parent
-     * loop in child
-     * find, update ShortName, and push child of the parent
-     * recursive
-    */
-    // for (let index in data) {
-    //   let child = data[index]
-    //   if (!child.parent) {
-    //     // Logger.log(child)
-    //     child.locationNumber = child.locationShortName
-    //     result.push(child)
-    //     if (child.child) {
-    //       result.concat(this.pushChildData(child.locationShortName, child.child))
-    //     }
-    //     continue
-    //   }
-    // }
-
     return data
   }
 
