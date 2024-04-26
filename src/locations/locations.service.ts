@@ -16,6 +16,7 @@ export default class LocationsService {
 
   /**
    * Return all locations in database
+   * TODO: remove child in model
    */
   async getAllLocations(): Promise<any[]> {
     const data = await this.locationsRepository.find()
@@ -108,7 +109,7 @@ export default class LocationsService {
       throw new HttpException("Location not found", HttpStatus.NOT_FOUND)
     }
   
-    if (updateLocation.parent?.id != foundLocation.parent.id) {
+    if (updateLocation.parent && foundLocation.parent && updateLocation.parent.id != foundLocation.parent.id) {
       if (updateLocation.parent?.id) {
         Logger.log(`Update Location ShortName with id: ${foundLocation.parent?.id}`)
         const parentLocation = await this.getLocationById(updateLocation.parent?.id)
@@ -123,7 +124,7 @@ export default class LocationsService {
     await this.locationsRepository.update(id, loc)
 
     Logger.log(`Update successfully!`)
-    return foundLocation
+    return loc
   }
 
   /**
