@@ -58,15 +58,157 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## Request
+
+### Create Parent
+#### Request
+```bash
+curl --location --request POST 'http://localhost:3000/locations' \
+--header {
+    'Content-Type: application/json',
+    } \
+--data-raw {
+  "locationName": "A",
+  "locationShortName": "A",
+  "area": 0
+}
+```
+
+#### Response
+```json
+{
+  "locationName": "A",
+  "locationShortName": "A",
+  "locationNumber": "A",
+  "area": 0,
+  "id": "78d01223-a2e4-4ea4-bb87-a869d0bdc5df"
+}
+```
+
+### Create Child
+#### Request
+```bash
+curl --location --request POST 'http://localhost:3000/locations' \
+--header {
+    'Content-Type: application/json',
+  } \
+--data-raw {
+  "locationName": "Car Park2",
+  "locationShortName": "CarPark",
+  "area": 80620,
+  "parent": {
+    "id": "78d01223-a2e4-4ea4-bb87-a869d0bdc5df"
+  }
+}
+```
+
+#### Response
+```json
+{
+  "locationName": "Car Park2",
+  "locationShortName": "CarPark",
+  "locationNumber": "A - CarPark",
+  "area": 80620,
+  "parent":{
+    "id": "78d01223-a2e4-4ea4-bb87-a869d0bdc5df"
+  },
+  "id": "37770fc5-7d6f-4ec4-97a4-591677a05fc3"
+}
+```
+##
+### Get
+#### Get all
+```bash
+curl --location --request GET 'http://localhost:3000/locations' \
+--header {
+  'Content-Type: application/json',
+  } \
+}
+```
+
+#### Response
+```json
+[
+  {
+    "id": "78d01223-a2e4-4ea4-bb87-a869d0bdc5df",
+    "locationName": "A",
+    "locationShortName": "A",
+    "locationNumber": "A",
+    "area": 0
+  },
+  {
+    "id": "a2e7f019-ac8b-4b55-857e-2e18c2757e91",
+    "locationName": "Car Park",
+    "locationShortName": "CarPark",
+    "locationNumber": "A - CarPark",
+    "area": 80620
+  }
+]
+```
+
+#### Get by ID
+```bash
+curl --location --request GET 'http://localhost:3000/locations/a2e7f019-ac8b-4b55-857e-2e18c2757e91' \
+--header {
+  'Content-Type: application/json',
+  } \
+}
+```
+
+#### Response
+```json
+{
+  "id": "a2e7f019-ac8b-4b55-857e-2e18c2757e91",
+  "locationName": "Car Park",
+  "locationShortName": "CarPark",
+  "locationNumber": "A - CarPark",
+  "area": 80620
+}
+```
+##
+### Update
+#### Request
+```bash
+curl --location --request PATCH 'http://localhost:3000/locations/a2e7f019-ac8b-4b55-857e-2e18c2757e91' \
+--header {
+  'Content-Type: application/json',
+  } \
+--data-raw {
+  "locationName": "Car Park3",
+  "locationShortName": "CarPark",
+  "locationNumber": "A - CarPark",
+  "area": 80620
+}
+```
+
+#### Response
+```json
+{
+  "locationName": "Car Park3",
+  "locationShortName": "CarPark",
+  "locationNumber": "A - CarPark",
+  "area": 80620
+}
+```
+##
+### Delete
+#### Request
+```bash
+curl --location --request DELETE 'http://localhost:3000/locations/a2e7f019-ac8b-4b55-857e-2e18c2757e91' \
+--header {
+  'Content-Type: application/json',
+  } \
+```
+
+#### Response
+```json
+200 OK
+```
+
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
 
 ## License
 
