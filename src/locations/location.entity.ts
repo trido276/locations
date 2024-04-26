@@ -1,8 +1,9 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Logger } from "@nestjs/common";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 
 @Entity()
-class Location {
-  @PrimaryGeneratedColumn('uuid')
+class Location extends BaseEntity {
+  @PrimaryGeneratedColumn("uuid")
   id: string
 
   @Column()
@@ -21,14 +22,12 @@ class Location {
   child: Location[]
 
   @ManyToOne(() => Location, parentLocation => parentLocation.child)
-  @JoinColumn()
   parent: Location
 
   /**
-   * parse_to_location_entity
+   * Parse Object to Location entity
    */
-  public parse_to_location(other_object: object): void {
-    //TODO: handle error
+  public parse(other_object: object): void {
     for (let key in other_object) {
       this[key] = other_object[key]
     }

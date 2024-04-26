@@ -1,8 +1,8 @@
-import { Module } from '@nestjs/common';
-import { LocationsModule } from './locations/locations.module';
-import { ConfigModule } from '@nestjs/config';
-import * as Joi from '@hapi/joi';
-import { DatabaseModule } from './database/database.module';
+import { Module } from "@nestjs/common";
+import { LocationsModule } from "./locations/locations.module";
+import { ConfigModule } from "@nestjs/config";
+import * as Joi from "@hapi/joi";
+import { DatabaseModule } from "./database/database.module";
  
 @Module({
   imports: [

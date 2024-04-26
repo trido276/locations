@@ -1,9 +1,13 @@
 export class UpdateLocationDto {
   id: string;
   locationName: string;
-  locationShortName: string;
+  // locationShortName: string;
   area: number;
-  building: string;
+  parent: ParentDto;
+}
+
+class ParentDto {
+  id: string
 }
 
 export default UpdateLocationDto;
