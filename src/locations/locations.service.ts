@@ -23,19 +23,6 @@ export default class LocationsService {
     return data
   }
 
-  pushChildData(parentShortName: string, children: Location[]) {
-    let result = []
-    for (let index in children) {
-      let childrenData = children[index]
-      childrenData.locationNumber= parentShortName.concat(`-${childrenData.locationShortName}`)
-      result.push(childrenData)
-      if (childrenData.child) {
-        result.concat(this.pushChildData(childrenData.locationShortName, childrenData.child))
-      }
-    }
-    return result
-  }
-
 
   /**
    * Get Location by ID, throw Error if any
@@ -75,8 +62,6 @@ export default class LocationsService {
     Logger.log(`Creating Location with values: ${loc.toString()}`)
     
     if (createLocationDto.parent?.id) {
-      Logger.log(`createLocationDto.parent?.id: ${createLocationDto.parent?.id}`)
-
       const parentLocation = await this.getLocationById(createLocationDto.parent.id)
       loc.locationNumber = `${parentLocation.locationShortName} ${HYPHEN_MINUS} ${loc.locationShortName}`
     } else {
@@ -102,23 +87,10 @@ export default class LocationsService {
     loc.parse(updateLocation)
     Logger.log(`Update Location ${id} with values: ${loc.toString()}`)
     
-    
     const foundLocation = await this.getLocationById(id)
     if (!foundLocation) {
       throw new HttpException("Location not found", HttpStatus.NOT_FOUND)
     }
-  
-    if (updateLocation.parent && foundLocation.parent && updateLocation.parent.id != foundLocation.parent.id) {
-      if (updateLocation.parent?.id) {
-        Logger.log(`Update Location ShortName with id: ${foundLocation.parent?.id}`)
-        const parentLocation = await this.getLocationById(updateLocation.parent?.id)
-        loc.locationNumber = `${parentLocation.locationShortName} ${HYPHEN_MINUS} ${loc.locationShortName}`
-      } else {
-        loc.locationNumber = loc.locationShortName
-      }
-    }
-
-    
 
     await this.locationsRepository.update(id, loc)
 
