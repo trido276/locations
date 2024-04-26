@@ -16,7 +16,6 @@ export default class LocationsService {
 
   /**
    * Return all locations in database
-   * TODO: remove child in model
    */
   async getAllLocations(): Promise<any[]> {
     const data = await this.locationsRepository.find()
@@ -62,7 +61,7 @@ export default class LocationsService {
 
   /**
     * Get parent then set locatioName = append child,
-    * shortName = append each parent"s shortName,
+    * shortName = append each parent's shortName,
     * new location doesnot have child,
     * throw Error if any
     * @param createLocationDto Data of created Location
@@ -130,8 +129,8 @@ export default class LocationsService {
   /**
    * Delete a location by ID,
    * If the location have parent, move children to that parent, else remove their parent,
-   * Finnaly update children"s LocationName,
-   * TODO: if remove the one have child: child must point to that one"s parent and reupdate locationName,
+   * Finnaly update children's LocationName,
+   * TODO: if remove the one have child: child must point to that one's parent and reupdate LocationName,
    * throw Error if any
    * @param id ID of the deleted Location
    */
