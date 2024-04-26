@@ -1,10 +1,10 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common'
-import CreateLocationDto from './dto/createLocation.dto'
-import Location from './location.entity'
-import UpdateLocationDto from './dto/updateLocation.dto'
-import { validate } from '../validate/validator'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { HttpException, HttpStatus, Injectable, Logger } from "@nestjs/common"
+import CreateLocationDto from "./dto/createLocation.dto"
+import Location from "./location.entity"
+import UpdateLocationDto from "./dto/updateLocation.dto"
+import { validate } from "../validate/validator"
+import { InjectRepository } from "@nestjs/typeorm"
+import { Repository } from "typeorm"
 
 const HYPHEN_MINUS = "-"
 @Injectable()
@@ -17,16 +17,48 @@ export default class LocationsService {
   /**
    * Return all locations in database
    */
-  getAllLocations(): Promise<Location[]> {
+  async getAllLocations(): Promise<any[]> {
+    const data = await this.locationsRepository.find()
+
+    // let result = []
     /**
-     * find all location that donot have parent > building
-     * then add their's childrend > then loop: if have chilren: get children
-     */
-    return this.locationsRepository.find()
+     * push parent
+     * loop in child
+     * find, update ShortName, and push child of the parent
+     * recursive
+    */
+    // for (let index in data) {
+    //   let child = data[index]
+    //   if (!child.parent) {
+    //     // Logger.log(child)
+    //     child.locationNumber = child.locationShortName
+    //     result.push(child)
+    //     if (child.child) {
+    //       result.concat(this.pushChildData(child.locationShortName, child.child))
+    //     }
+    //     continue
+    //   }
+    // }
+
+    return data
   }
+
+  pushChildData(parentShortName: string, children: Location[]) {
+    let result = []
+    for (let index in children) {
+      let childrenData = children[index]
+      childrenData.locationNumber= parentShortName.concat(`-${childrenData.locationShortName}`)
+      result.push(childrenData)
+      if (childrenData.child) {
+        result.concat(this.pushChildData(childrenData.locationShortName, childrenData.child))
+      }
+    }
+    return result
+  }
+
+
   /**
-   * Validate ID then find location by the ID in database,
-   * throw Error if any
+   * Get Location by ID, throw Error if any
    * @param id ID of the Location
    * @returns Location if found
    */
@@ -37,19 +69,19 @@ export default class LocationsService {
           id: id,
         }
       })
-      if (location) {
-        return location
+      if (!location) {
+        throw new HttpException("Location not found", HttpStatus.NOT_FOUND)
       }
-      throw new HttpException('Location not found', HttpStatus.NOT_FOUND)
+      return location
     }
     catch {
-      throw new HttpException('Invalid input syntax', HttpStatus.BAD_REQUEST)
+      throw new HttpException("Invalid input syntax", HttpStatus.BAD_REQUEST)
     }
   }
 
   /**
     * Get parent then set locatioName = append child,
-    * shortName = append each parent's shortName,
+    * shortName = append each parent"s shortName,
     * new location doesnot have child,
     * throw Error if any
     * @param createLocationDto Data of created Location
@@ -59,10 +91,13 @@ export default class LocationsService {
 
     await validate(createLocationDto)
     let loc = new Location
-    loc.parse_to_location(createLocationDto)
+    loc.parse(createLocationDto)
     Logger.log(`Creating Location with values: ${loc.toString()}`)
-    if (createLocationDto.parent) {
-      const parentLocation = await this.getLocationById(createLocationDto.parent)
+    
+    if (createLocationDto.parent?.id) {
+      Logger.log(`createLocationDto.parent?.id: ${createLocationDto.parent?.id}`)
+
+      const parentLocation = await this.getLocationById(createLocationDto.parent.id)
       loc.locationNumber = `${parentLocation.locationShortName} ${HYPHEN_MINUS} ${loc.locationShortName}`
     } else {
       loc.locationNumber = loc.locationShortName
@@ -75,45 +110,54 @@ export default class LocationsService {
   }
 
   /**
-   * 
-   * if B parent A, C parent A, -> 1-1: C parent A, remove A child in B,
-   * if update parent > find child and update them,
-   * have to do in update/create or get func,
+   * Update Location of the given ID
+   * TODO: handle update CHILD locationNumber when update PARENT
    * @param id ID of the updated Location
    * @param updateLocation Data of the updated Location
    * @returns Updated Location
    */
   async updateLocation(id: string, updateLocation: UpdateLocationDto): Promise<Location> {
     await validate(updateLocation)
-    const location = new Location
-    location.parse_to_location(updateLocation)
-    Logger.log(`Update Location ${id} with values: ${location.toString()}`)
-
-    // TODO: try catch
-
-    const updatedLocation = await this.getLocationById(id)
-    if (!updatedLocation) {
-      throw new HttpException('Location not found', HttpStatus.NOT_FOUND)
+    const loc = new Location
+    loc.parse(updateLocation)
+    Logger.log(`Update Location ${id} with values: ${loc.toString()}`)
+    
+    
+    const foundLocation = await this.getLocationById(id)
+    if (!foundLocation) {
+      throw new HttpException("Location not found", HttpStatus.NOT_FOUND)
+    }
+  
+    if (updateLocation.parent?.id != foundLocation.parent.id) {
+      if (updateLocation.parent?.id) {
+        Logger.log(`Update Location ShortName with id: ${foundLocation.parent?.id}`)
+        const parentLocation = await this.getLocationById(updateLocation.parent?.id)
+        loc.locationNumber = `${parentLocation.locationShortName} ${HYPHEN_MINUS} ${loc.locationShortName}`
+      } else {
+        loc.locationNumber = loc.locationShortName
+      }
     }
 
-    await this.locationsRepository.update(id, location)
+    
+
+    await this.locationsRepository.update(id, loc)
 
     Logger.log(`Update successfully!`)
-    return updatedLocation
+    return foundLocation
   }
 
   /**
    * Delete a location by ID,
    * If the location have parent, move children to that parent, else remove their parent,
-   * Finnaly update children's LocationName,
-   * TODO: if remove the one have child: child must point to that one's parent and reupdate locationName,
+   * Finnaly update children"s LocationName,
+   * TODO: if remove the one have child: child must point to that one"s parent and reupdate locationName,
    * throw Error if any
    * @param id ID of the deleted Location
    */
   async deleteLocation(id: string): Promise<void> {
     const deleteResponse = await this.locationsRepository.delete(id)
     if (!deleteResponse.affected) {
-      throw new HttpException('Location not found', HttpStatus.NOT_FOUND)
+      throw new HttpException("Location not found", HttpStatus.NOT_FOUND)
     }
   }
 
