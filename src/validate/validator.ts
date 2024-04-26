@@ -21,7 +21,6 @@ export async function validate(location: Object): Promise<void> {
  * @param location 
  */
 async function validateShortName(location: Object): Promise<void> {
-  Logger.log("validateShortName",location, location["locationShortName"], location["parent"]?.["id"])
   const shortName = location["locationShortName"]
   const find = await Location.find({
     relations: {
@@ -29,16 +28,15 @@ async function validateShortName(location: Object): Promise<void> {
     },
     where: {
       parent: {
-        id : location["parent"]?.["id"] || null
+        id: location["parent"]?.["id"] || null
       }
     }
   }
-)
+  )
 
-if (!find) {
-  return
-}
-Logger.log("find", find.toString())
+  if (!find) {
+    return
+  }
 
   for (let each in find) {
     if (each["locationShortName"] == shortName) {

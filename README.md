@@ -26,6 +26,35 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+# TypeScript Backend: Crafting a Database with Ease
+
+TypeScript backend project \
+Handle database design, specifically to support an **Address Location Tree** using Postgres.
+
+![alt text](image.png)
+
+## Location Structure
+
+Structure of a Location:
+
+- **ID**: Automatically generated
+- **Location Name**: Simple and straightforward
+- **Short Name**: A quick identifier for parent paths
+- **Location Number**: Clearly maps the path from its parent
+- **Area**: Provides the size of each location
+- **Parent**: Links locations to their respective parent using IDs
+
+## Key Features
+
+- **Logical Relationships**: Connects children to parents and ensures each sibling has a unique ShortName.
+- **Functions**: Handles request validation, exception management, logging, clean code, and documentation.
+
+## To-do list
+
+- **Handle Update of Child Location Numbers when Parent is Updated**: when a parent location is updated, all child locationNumber are adjusted.
+- **Update Child Locations when Removing a Parent**: When removing a parent location, ensure that child locations are reassigned to the parent's parent (if available) and update their LocationName.
+
+
 ## Installation
 
 ```bash

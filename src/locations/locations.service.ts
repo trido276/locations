@@ -16,25 +16,11 @@ export default class LocationsService {
 
   /**
    * Return all locations in database
-   * TODO: remove child in model
    */
   async getAllLocations(): Promise<any[]> {
     const data = await this.locationsRepository.find()
 
     return data
-  }
-
-  pushChildData(parentShortName: string, children: Location[]) {
-    let result = []
-    for (let index in children) {
-      let childrenData = children[index]
-      childrenData.locationNumber= parentShortName.concat(`-${childrenData.locationShortName}`)
-      result.push(childrenData)
-      if (childrenData.child) {
-        result.concat(this.pushChildData(childrenData.locationShortName, childrenData.child))
-      }
-    }
-    return result
   }
 
 
@@ -62,7 +48,7 @@ export default class LocationsService {
 
   /**
     * Get parent then set locatioName = append child,
-    * shortName = append each parent"s shortName,
+    * shortName = append each parent's shortName,
     * new location doesnot have child,
     * throw Error if any
     * @param createLocationDto Data of created Location
@@ -76,8 +62,6 @@ export default class LocationsService {
     Logger.log(`Creating Location with values: ${loc.toString()}`)
     
     if (createLocationDto.parent?.id) {
-      Logger.log(`createLocationDto.parent?.id: ${createLocationDto.parent?.id}`)
-
       const parentLocation = await this.getLocationById(createLocationDto.parent.id)
       loc.locationNumber = `${parentLocation.locationShortName} ${HYPHEN_MINUS} ${loc.locationShortName}`
     } else {
@@ -103,23 +87,10 @@ export default class LocationsService {
     loc.parse(updateLocation)
     Logger.log(`Update Location ${id} with values: ${loc.toString()}`)
     
-    
     const foundLocation = await this.getLocationById(id)
     if (!foundLocation) {
       throw new HttpException("Location not found", HttpStatus.NOT_FOUND)
     }
-  
-    if (updateLocation.parent && foundLocation.parent && updateLocation.parent.id != foundLocation.parent.id) {
-      if (updateLocation.parent?.id) {
-        Logger.log(`Update Location ShortName with id: ${foundLocation.parent?.id}`)
-        const parentLocation = await this.getLocationById(updateLocation.parent?.id)
-        loc.locationNumber = `${parentLocation.locationShortName} ${HYPHEN_MINUS} ${loc.locationShortName}`
-      } else {
-        loc.locationNumber = loc.locationShortName
-      }
-    }
-
-    
 
     await this.locationsRepository.update(id, loc)
 
@@ -130,8 +101,8 @@ export default class LocationsService {
   /**
    * Delete a location by ID,
    * If the location have parent, move children to that parent, else remove their parent,
-   * Finnaly update children"s LocationName,
-   * TODO: if remove the one have child: child must point to that one"s parent and reupdate locationName,
+   * Finnaly update children's LocationName,
+   * TODO: if remove the one have child: child must point to that one's parent and reupdate LocationName,
    * throw Error if any
    * @param id ID of the deleted Location
    */
