@@ -46,11 +46,11 @@ Structure of a Location:
 
 ## Key Features
 
-- **Logical Relationships**: Connects children to parents and ensures each sibling has a unique ShortName.
 - **Functions**: Handles request validation, exception management, logging, clean code, and documentation.
 
 ## To-do list
 
+- **Logical Relationships**: Connects children to parents and ensures each sibling has a unique ShortName.
 - **Handle Update of Child Location Numbers when Parent is Updated**: when a parent location is updated, all child locationNumber are adjusted.
 - **Update Child Locations when Removing a Parent**: When removing a parent location, ensure that child locations are reassigned to the parent's parent (if available) and update their LocationName.
 
